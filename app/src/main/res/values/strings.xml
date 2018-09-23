@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Image Categorizer</string>
+    <string name="Open">Open</string>
+    <string name="Close">Close</string>
+
+    <string-array name="tags">
+        <item>Malaysia</item>
+        <item>United States</item>
+        <item>Indonesia</item>
+        <item>France</item>
+        <item>Italy</item>
+        <item>Singapore</item>
+        <item>New Zealand</item>
+        <item>India</item>
+    </string-array>
+</resources>

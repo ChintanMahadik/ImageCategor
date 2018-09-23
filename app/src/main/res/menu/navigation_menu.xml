@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/create_tag"
+        android:title="Tags"
+        android:icon="@drawable/create_tag">
+    </item>
+
+    <item
+        android:id="@+id/tags_album"
+        android:title="Tags Album"
+        android:icon="@drawable/tag">
+    </item>
+
+    <item
+        android:id="@+id/search"
+        android:title="Search"
+        android:icon="@drawable/search">
+    </item>
+
+    <item
+        android:id="@+id/about"
+        android:title="About"
+        android:icon="@drawable/about">
+    </item>
+    <item
+        android:id="@+id/logo"
+        android:title="Logo"
+        android:icon="@drawable/logo">
+    </item>
+</menu>

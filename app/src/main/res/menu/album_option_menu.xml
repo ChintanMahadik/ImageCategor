@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/select_all"
+        android:title="Select All"
+        android:icon="@drawable/select_all">
+    </item>
+    <item
+        android:id="@+id/create_tag"
+        android:title="Create Tag"
+        android:icon="@drawable/create_tag">
+    </item>
+
+    <item
+        android:id="@+id/remove_tag"
+        android:title="Remove Tag"
+        android:icon="@drawable/delete">
+    </item>
+
+    <item
+        android:id="@+id/delete"
+        android:title="Delete Untagged"
+        android:icon="@drawable/delete_untagged">
+    </item>
+
+    <item
+        android:id="@+id/copy"
+        android:title="Copy"
+        android:icon="@drawable/copy">
+    </item>
+    <item
+        android:id="@+id/cut"
+        android:title="Cut"
+        android:icon="@drawable/delete">
+    </item>
+
+    <item
+        android:id="@+id/move"
+        android:title="Move"
+        android:icon="@drawable/cut">
+    </item>
+
+</menu>
