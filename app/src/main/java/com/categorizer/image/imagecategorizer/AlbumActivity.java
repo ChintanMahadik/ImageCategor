@@ -51,7 +51,7 @@ public class AlbumActivity extends AppCompatActivity {
     String album_name = "";
     LoadAlbumImages loadAlbumTask;
     String tag_item=null;
-    int lastTaggedIndex=0;
+    static int lastTaggedIndex=0;
     static SingleAlbumAdapter adapter;
     static Spinner sItems;
     static LinearLayout.LayoutParams lp;
@@ -64,6 +64,7 @@ public class AlbumActivity extends AppCompatActivity {
     Drawable d;
     static Button createTag;
     LinearLayout.LayoutParams params;
+    static int refresh=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +74,7 @@ public class AlbumActivity extends AppCompatActivity {
         album_name = intent.getStringExtra("name");
         setTitle(album_name);
 
-
+        System.out.println("Last index "+lastTaggedIndex);
         galleryGridView = (GridView) findViewById(R.id.galleryGridView);
         int iDisplayWidth = getResources().getDisplayMetrics().widthPixels ;
         Resources resources = getApplicationContext().getResources();
@@ -105,7 +106,7 @@ public class AlbumActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.select_all:
-                Toast.makeText(AlbumActivity.this,"Select All",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(AlbumActivity.this,"Select All",Toast.LENGTH_SHORT).show();
                 break;
             case R.id.create_tag:
                 CreateTag_Popup createTag_popup=new CreateTag_Popup();
@@ -113,12 +114,12 @@ public class AlbumActivity extends AppCompatActivity {
                 break;
 
             case R.id.remove_tag:
-                Toast.makeText(AlbumActivity.this,"Remove Tag",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(AlbumActivity.this,"Remove Tag",Toast.LENGTH_SHORT).show();
                 break;
             case R.id.delete:
-                Toast.makeText(AlbumActivity.this,"Delete UnTagged",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(AlbumActivity.this,"Delete UnTagged",Toast.LENGTH_SHORT).show();
                 for(int i=0;i<lastTaggedIndex;i++){
-                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
+                    //sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
                     try {
                         ExifInterface exifInterface =new ExifInterface(imageList.get(i).get(Function.KEY_PATH).toString());
                         String tag=exifInterface.getAttribute(ExifInterface.TAG_MAKE);
@@ -127,7 +128,8 @@ public class AlbumActivity extends AppCompatActivity {
                             File f=new File(imageList.get(i).get(Function.KEY_PATH));
                             f.delete();
                             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
-
+                            imageList.get(i).remove(Function.KEY_PATH);
+                            AlbumActivity.adapter = new SingleAlbumAdapter(AlbumActivity.this, imageList);
                         }
 
                     } catch (IOException e) {
@@ -135,18 +137,22 @@ public class AlbumActivity extends AppCompatActivity {
                     }
 
                 }
-                galleryGridView.setAdapter(adapter);
+                //galleryGridView.setAdapter(adapter);
+
+                galleryGridView.setAdapter(AlbumActivity.adapter);
+                lastTaggedIndex=0;
+                System.out.println("Last Index is "+lastTaggedIndex);
                 finish();
                 startActivity(getIntent());
                 break;
             case R.id.copy:
-                Toast.makeText(AlbumActivity.this,"Copy",Toast.LENGTH_SHORT).show();
+               // Toast.makeText(AlbumActivity.this,"Copy",Toast.LENGTH_SHORT).show();
                 break;
             case R.id.move:
-                Toast.makeText(AlbumActivity.this,"Move",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(AlbumActivity.this,"Move",Toast.LENGTH_SHORT).show();
                 break;
             case R.id.cut:
-                Toast.makeText(AlbumActivity.this,"Cut",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(AlbumActivity.this,"Cut",Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;
@@ -199,7 +205,7 @@ public class AlbumActivity extends AppCompatActivity {
                 public void onItemClick(AdapterView<?> parent, View view,
                                         final int position, long id) {
                     Intent intent = new Intent(AlbumActivity.this, GalleryPreview.class);
-                    intent.putExtra("path", imageList.get(+position).get(Function.KEY_PATH));
+                    intent.putExtra("path", imageList.get(+position).get(Function.KEY_PATH) + ";"+position );
                     startActivity(intent);
                 }
             });
@@ -273,7 +279,7 @@ public class AlbumActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             try {
                                 if(imageList.get(i).get(Function.KEY_PATH).toString().endsWith(".png")){
-                                    Toast.makeText(AlbumActivity.this,"This is PNG Image",Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(AlbumActivity.this,"This is PNG Image",Toast.LENGTH_SHORT).show();
                                     File dest = new File(imageList.get(i).get(Function.KEY_PATH).toString());
                                     FileInputStream fis;
                                     fis = new FileInputStream(dest);
@@ -289,23 +295,27 @@ public class AlbumActivity extends AppCompatActivity {
                                     }
 
                                     dest.delete();
+                                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
                                     imageList.get(i).put(Function.KEY_PATH,filename_jpg);
-
                                     sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
                                     galleryGridView.setAdapter(AlbumActivity.adapter);
+
+                                    //ExifInterface exifInterface=new ExifInterface(imageList.get(i).get(Function.KEY_PATH));
+                                    String removed=imd.setMetaData(imageList.get(i).get(Function.KEY_PATH), getApplicationContext(), null, null);
+                                    getData = imd.getMetaData(imageList.get(i).get(Function.KEY_PATH),getApplicationContext());
                                     finish();
                                     startActivity(getIntent());
                                 }
+                                else{
+                                    //ExifInterface exifInterface=new ExifInterface(imageList.get(i).get(Function.KEY_PATH));
+                                    String removed=imd.setMetaData(imageList.get(i).get(Function.KEY_PATH), getApplicationContext(), null, null);
+                                    //getData = imd.getMetaData(imageList.get(i).get(Function.KEY_PATH),getApplicationContext());
+                                }
 
-                                ExifInterface exifInterface=new ExifInterface(imageList.get(i).get(Function.KEY_PATH));
-                                String removed=imd.setMetaData(imageList.get(i).get(Function.KEY_PATH), getApplicationContext(), null, null);
-                               getData = imd.getMetaData(imageList.get(i).get(Function.KEY_PATH),getApplicationContext());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                            Toast.makeText(getApplicationContext(), "Tag Removed", Toast.LENGTH_SHORT).show();
-                            Toast.makeText(getApplicationContext(), getData, Toast.LENGTH_SHORT).show();
-
+                            //Toast.makeText(getApplicationContext(), "Tag Removed", Toast.LENGTH_SHORT).show();
                         }
                     });
                     alert.setNegativeButton("Assign Tag", new DialogInterface.OnClickListener() {
@@ -314,7 +324,7 @@ public class AlbumActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             try {
                                 if(imageList.get(i).get(Function.KEY_PATH).toString().endsWith(".png")){
-                                    Toast.makeText(AlbumActivity.this,"This is PNG Image",Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(AlbumActivity.this,"This is PNG Image",Toast.LENGTH_SHORT).show();
                                     File location = new File(imageList.get(i).get(Function.KEY_PATH).toString().substring(0,imageList.get(i).get(Function.KEY_PATH).toString().lastIndexOf(".")));
                                     String fileName=imageList.get(i).get(Function.KEY_PATH).toString().substring(imageList.get(i).get(Function.KEY_PATH).toString().lastIndexOf("."));
                                     File dest = new File(imageList.get(i).get(Function.KEY_PATH));
@@ -336,6 +346,7 @@ public class AlbumActivity extends AppCompatActivity {
                                     imageList.get(i).put(Function.KEY_PATH,filename_jpg);
                                     AlbumActivity.adapter = new SingleAlbumAdapter(AlbumActivity.this, imageList);
                                     sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
+                                    setData = imd.setMetaData(imageList.get(i).get(Function.KEY_PATH), getApplicationContext(), tag_item, description_text.getText().toString());
                                     galleryGridView.setAdapter(AlbumActivity.adapter);
                                     finish();
                                     startActivity(getIntent());
@@ -347,8 +358,7 @@ public class AlbumActivity extends AppCompatActivity {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                            Toast.makeText(getApplicationContext(), setData, Toast.LENGTH_LONG).show();
-
+                            //Toast.makeText(getApplicationContext(), setData, Toast.LENGTH_LONG).show();
                             DatabaseHelper dbhelper=new DatabaseHelper(AlbumActivity.this,"LAST_TAGGED");
                             Boolean c= dbhelper.SAVE_LAST_TAGGED(album_name,i);
                             Cursor cur=dbhelper.getLASTTAGGED(album_name);
@@ -357,8 +367,8 @@ public class AlbumActivity extends AppCompatActivity {
                                 row.add(cur.getString(0));
                             }
                             lastTaggedIndex=Integer.parseInt(row.get(0));
+                            System.out.println("Last Index is set to "+ lastTaggedIndex);
                             //Delete untagged before this index
-                            Toast.makeText(AlbumActivity.this,"Size is "+row.get(0),Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -371,7 +381,16 @@ public class AlbumActivity extends AppCompatActivity {
         }
 
     }
-
+    @Override
+    public void onResume()
+    {  // After a pause OR at startup
+        super.onResume();
+        if(refresh!=0) {
+            refresh=0;
+            finish();
+            startActivity(getIntent());
+        }
+    }
     private void create_popup() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(AlbumActivity.this);
         LinearLayout layout = new LinearLayout(AlbumActivity.this);
@@ -403,7 +422,7 @@ public class AlbumActivity extends AppCompatActivity {
                 DatabaseHelper dbhelper=new DatabaseHelper(AlbumActivity.this,"IMAGE_TAGS");
                 boolean insertData = dbhelper.addData(tag.getText().toString());
 
-                Toast.makeText(AlbumActivity.this, ""+insertData, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(AlbumActivity.this, ""+insertData, Toast.LENGTH_SHORT).show();
 
                 Spinner sItems= setDropDown(AlbumActivity.lp);
                 AlbumActivity.layout.removeAllViews();

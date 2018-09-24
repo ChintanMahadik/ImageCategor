@@ -52,7 +52,6 @@ public class GalleryPreview extends AppCompatActivity {
     static LinearLayout.LayoutParams lp;
     Spinner sItems;
     String tag_item=null;
-    int lastTaggedIndex=0;
     LinearLayout.LayoutParams params;
     static EditText description_text;
     static TextView add_newTag;
@@ -60,6 +59,9 @@ public class GalleryPreview extends AppCompatActivity {
     static TextView description;
     Drawable d;
     static Button createTag;
+    String album_name;
+    String extras[];
+    int image_index;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,8 +69,12 @@ public class GalleryPreview extends AppCompatActivity {
         setContentView(R.layout.gallery_preview);
         Intent intent = getIntent();
         getSupportActionBar().hide();
-        path = intent.getStringExtra("path");
-
+        extras=intent.getStringExtra("path").split(";");
+        path = extras[0];
+        image_index=Integer.parseInt(extras[1]);
+        album_name=path.substring(0,path.lastIndexOf("/"));
+        album_name=album_name.substring(album_name.lastIndexOf("/")+1,album_name.length());
+       // Toast.makeText(GalleryPreview.this,album_name,Toast.LENGTH_SHORT).show();
         GalleryPreviewImg = (ImageView) findViewById(R.id.GalleryPreviewImg);
         Glide.with(GalleryPreview.this)
                 .load(new File(path)) // Uri of the picture
@@ -196,7 +202,7 @@ public class GalleryPreview extends AppCompatActivity {
                                     Glide.with(GalleryPreview.this)
                                             .load(new File(path)) // Uri of the picture
                                             .into(GalleryPreviewImg);
-                                   // exifInterface=new ExifInterface(path);
+                                    exifInterface=new ExifInterface(path);
                                     exifInterface.setAttribute(ExifInterface.TAG_MAKE,tag_item);
                                     exifInterface.setAttribute("UserComment",description_text.getText().toString());
                                     exifInterface.saveAttributes();
@@ -215,17 +221,17 @@ public class GalleryPreview extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                             Toast.makeText(getApplicationContext(), setData, Toast.LENGTH_LONG).show();
-                            String album_name=path.substring(0,path.lastIndexOf("/"));
+                            album_name=path.substring(0,path.lastIndexOf("/"));
                             album_name=album_name.substring(album_name.lastIndexOf("/")+1,album_name.length());
 
                             DatabaseHelper dbhelper=new DatabaseHelper(GalleryPreview.this,"LAST_TAGGED");
-                            Boolean c= dbhelper.SAVE_LAST_TAGGED(album_name,0);
+                            Boolean c= dbhelper.SAVE_LAST_TAGGED(album_name,image_index);
                             Cursor cur=dbhelper.getLASTTAGGED(album_name);
                             ArrayList<String> row = new ArrayList<>();
                             while(cur.moveToNext()){
                                 row.add(cur.getString(0));
                             }
-                            lastTaggedIndex=Integer.parseInt(row.get(0));
+                            AlbumActivity.lastTaggedIndex=Integer.parseInt(row.get(0));
                         }
                     });
                     alert.show();
@@ -331,8 +337,15 @@ public class GalleryPreview extends AppCompatActivity {
         });
 
 
+        AlbumActivity.refresh=1;
     }
-
+//
+//
+//    @Override
+//    public void onBackPressed() {
+//        finish();
+//        startActivity(new Intent(GalleryPreview.this,AlbumActivity.class).putExtra("name",album_name));
+//    }
     private void create_popup() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(GalleryPreview.this);
         LinearLayout layout = new LinearLayout(GalleryPreview.this);
