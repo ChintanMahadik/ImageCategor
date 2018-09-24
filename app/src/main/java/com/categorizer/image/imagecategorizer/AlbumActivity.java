@@ -118,6 +118,14 @@ public class AlbumActivity extends AppCompatActivity {
                 break;
             case R.id.delete:
                 //Toast.makeText(AlbumActivity.this,"Delete UnTagged",Toast.LENGTH_SHORT).show();
+                DatabaseHelper dbhelper=new DatabaseHelper(AlbumActivity.this,"LAST_TAGGED");
+                Cursor cur=dbhelper.getLASTTAGGED(album_name);
+                ArrayList<String> row = new ArrayList<>();
+                while(cur.moveToNext()){
+                    row.add(cur.getString(0));
+                }
+                lastTaggedIndex=Integer.parseInt(row.get(0));
+                System.out.println("Initial Last Index is set to "+ lastTaggedIndex);
                 for(int i=0;i<lastTaggedIndex;i++){
                     //sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
                     try {
