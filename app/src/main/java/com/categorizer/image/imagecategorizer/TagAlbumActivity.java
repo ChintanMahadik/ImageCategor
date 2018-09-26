@@ -55,6 +55,7 @@ public class TagAlbumActivity extends AppCompatActivity {
     private ProgressBar pgsBar;
     SearchImage searchImage;
     String album_name;
+    static int refresh=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +66,8 @@ public class TagAlbumActivity extends AppCompatActivity {
         imagesGridView=(GridView)findViewById(R.id.displayTagImages) ;
         searchImage = new SearchImage();
         searchImage.execute();
+
+        ShowTags.refresh=1;
     }
 
     class SearchImage extends AsyncTask<String, Void, String>{
@@ -82,10 +85,12 @@ public class TagAlbumActivity extends AppCompatActivity {
 
             String xml = "";
             String s = intent.getStringExtra("album_list");
+
             String paths[]=s.split(",");
             int len=paths.length;
             String title=paths[len-2].toString();
-            setTitle(title);
+            System.out.println("Title is "+title);
+           // setTitle(title);
             System.out.println(paths[len-1]);
             ExifInterface exifInterface=null;
             String tag_name=null;
@@ -111,14 +116,14 @@ public class TagAlbumActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String xml) {
            // pgsBar.setVisibility(View.GONE);
-            SingleAlbumAdapter adapter = new SingleAlbumAdapter(TagAlbumActivity.this, all_Tag_ImageList_toDisplay);
+            SingleAlbumAdapter_noCheck adapter = new SingleAlbumAdapter_noCheck(TagAlbumActivity.this, all_Tag_ImageList_toDisplay);
             imagesGridView.setAdapter(adapter);
 
             imagesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View view,
                                         final int position, long id) {
                     Intent intent = new Intent(TagAlbumActivity.this, GalleryPreview.class);
-                    intent.putExtra("path", all_Tag_ImageList_toDisplay.get(+position).get(Function.KEY_PATH));
+                    intent.putExtra("path", all_Tag_ImageList_toDisplay.get(+position).get(Function.KEY_PATH)+","+position);
                     startActivity(intent);
                 }
             });
@@ -127,6 +132,16 @@ public class TagAlbumActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onResume()
+    {  // After a pause OR at startup
+        super.onResume();
+        if(refresh!=0) {
+            refresh=0;
+            finish();
+            startActivity(getIntent());
+        }
+    }
 }
 
 

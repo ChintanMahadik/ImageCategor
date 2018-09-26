@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle toggle;
+    static int refresh =0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                      for(int i=0;i<albumList.size();i++){
                          s+=albumList.get(i).get(Function.KEY_PATH)+",";
                      }
+                     System.out.println("Album size is "+albumList.size());
                      startActivity(new Intent(MainActivity.this,ShowTags.class).putExtra("album_list", s));
                  }
                  if(id==R.id.search){
@@ -210,7 +212,14 @@ public class MainActivity extends AppCompatActivity {
         if(!Function.hasPermissions(this, PERMISSIONS)){
             startActivity(new Intent(MainActivity.this,StartScreen.class));
             ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST_PERMISSION_KEY);
-        }else{
+        }
+        else if (refresh!=0){
+            refresh=0;
+            finish();
+            startActivity(getIntent());
+        }
+        else
+        {
             loadAlbumTask = new LoadAlbum();
             loadAlbumTask.execute();
         }

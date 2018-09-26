@@ -34,6 +34,7 @@ public class ShowTags extends AppCompatActivity {
     GridView tagsGridView;
     private ProgressBar pgsBar;
     String tagname;
+    static int refresh=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -172,5 +173,16 @@ public class ShowTags extends AppCompatActivity {
         }
 
 
+    }
+
+    @Override
+    public void onResume()
+    {  // After a pause OR at startup
+        super.onResume();
+        if(refresh!=0) {
+            refresh=0;
+            finish();
+            startActivity(getIntent());
+        }
     }
 }

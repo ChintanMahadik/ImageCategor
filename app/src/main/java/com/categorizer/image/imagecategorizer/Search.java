@@ -125,10 +125,19 @@ public class Search extends AppCompatActivity {
 
                             ExifInterface exifInterface = new ExifInterface(all_ImageList.get(i).get(Function.KEY_PATH).toString());
                             String tag= exifInterface.getAttribute(ExifInterface.TAG_MAKE);
+                            String desc= exifInterface.getAttribute("UserComment");
 
                             if(tag!=null)
-                                if(tag.equalsIgnoreCase(search_text.getText().toString())){
+                                if(desc!=null){
+                                 if(tag.equalsIgnoreCase(search_text.getText().toString()) || desc.contains(search_text.getText().toString())){
                                     all_ImageList_toDisplay.add(all_ImageList.get(i));
+                                 }
+                                }
+                                else
+                                {
+                                    if(tag.equalsIgnoreCase(search_text.getText().toString())){
+                                        all_ImageList_toDisplay.add(all_ImageList.get(i));
+                                    }
                                 }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -140,14 +149,14 @@ public class Search extends AppCompatActivity {
         @Override
         protected void onPostExecute(String xml) {
             pgsBar.setVisibility(View.GONE);
-            SingleAlbumAdapter adapter = new SingleAlbumAdapter(Search.this, all_ImageList_toDisplay);
+            SingleAlbumAdapter_noCheck adapter = new SingleAlbumAdapter_noCheck(Search.this, all_ImageList_toDisplay);
             imagesGridView.setAdapter(adapter);
 
             imagesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View view,
                                         final int position, long id) {
                     Intent intent = new Intent(Search.this, GalleryPreview.class);
-                    intent.putExtra("path", all_ImageList_toDisplay.get(+position).get(Function.KEY_PATH));
+                    intent.putExtra("path", all_ImageList_toDisplay.get(+position).get(Function.KEY_PATH)+","+position);
                     startActivity(intent);
                 }
             });

@@ -74,6 +74,14 @@
             fab:fab_size="mini" />
 
         <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/assign_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/white_plus"
+            fab:fab_label="Assign Tag"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
             android:id="@+id/remove_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

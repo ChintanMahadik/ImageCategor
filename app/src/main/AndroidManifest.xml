@@ -38,7 +38,7 @@
         <activity android:name=".Search" />
         <activity android:name=".ShowTags" />
         <activity android:name=".TagAlbumActivity" />
-        <activity android:name=".StartScreen"></activity>
+        <activity android:name=".StartScreen" />
     </application>
 
 </manifest>

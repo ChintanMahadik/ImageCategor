@@ -69,7 +69,8 @@ public class GalleryPreview extends AppCompatActivity {
         setContentView(R.layout.gallery_preview);
         Intent intent = getIntent();
         getSupportActionBar().hide();
-        extras=intent.getStringExtra("path").split(";");
+        extras=intent.getStringExtra("path").split(",");
+        System.out.println("Gallery intent "+extras[0]);
         path = extras[0];
         image_index=Integer.parseInt(extras[1]);
         album_name=path.substring(0,path.lastIndexOf("/"));
@@ -177,7 +178,7 @@ public class GalleryPreview extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             try {
                                 if(path.endsWith(".png")){
-                                    Toast.makeText(GalleryPreview.this,"This is PNG Image",Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(GalleryPreview.this,"This is PNG Image",Toast.LENGTH_SHORT).show();
                                     File location = new File(path.substring(0,path.lastIndexOf(".")));
                                     String fileName=path.substring(path.lastIndexOf("."));
                                     File dest = new File(path);
@@ -208,7 +209,7 @@ public class GalleryPreview extends AppCompatActivity {
                                     exifInterface.saveAttributes();
 
                                     finish();
-                                    startActivity(getIntent().putExtra("path",path));
+                                    startActivity(getIntent().putExtra("path",path+";"+image_index));
 
 
                                 }
@@ -220,7 +221,7 @@ public class GalleryPreview extends AppCompatActivity {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                            Toast.makeText(getApplicationContext(), setData, Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getApplicationContext(), setData, Toast.LENGTH_LONG).show();
                             album_name=path.substring(0,path.lastIndexOf("/"));
                             album_name=album_name.substring(album_name.lastIndexOf("/")+1,album_name.length());
 
@@ -338,6 +339,7 @@ public class GalleryPreview extends AppCompatActivity {
 
 
         AlbumActivity.refresh=1;
+        TagAlbumActivity.refresh=1;
     }
 //
 //
@@ -346,6 +348,8 @@ public class GalleryPreview extends AppCompatActivity {
 //        finish();
 //        startActivity(new Intent(GalleryPreview.this,AlbumActivity.class).putExtra("name",album_name));
 //    }
+
+
     private void create_popup() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(GalleryPreview.this);
         LinearLayout layout = new LinearLayout(GalleryPreview.this);

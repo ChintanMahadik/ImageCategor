@@ -92,7 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getLASTTAGGED(String folder_name){
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "SELECT LAST_COUNT,FOLDER_NAME from LAST_TAGGED where FOLDER_NAME='"+folder_name+"'";
+        String query = "SELECT LAST_COUNT from LAST_TAGGED where FOLDER_NAME='"+folder_name+"'";
         Cursor data = db.rawQuery(query, null);
         return data;
     }
