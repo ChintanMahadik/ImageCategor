@@ -80,6 +80,7 @@ public class AlbumActivity extends AppCompatActivity {
     static int checked_item=0;
     static int deleted=0;
     static int select_all=0;
+    static int tagsareAssigned=0;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +117,7 @@ public class AlbumActivity extends AppCompatActivity {
             finish();
             startActivity(getIntent());
         }
+
 
         share.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -245,10 +247,11 @@ public class AlbumActivity extends AppCompatActivity {
                                         dest.delete();
                                         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList_Selected.get(i)))));
                                         imageList.get(i).put(Function.KEY_PATH, filename_jpg);
-                                        AlbumActivity.adapter = new SingleAlbumAdapter(AlbumActivity.this, imageList);
+
                                         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
                                         setData = imd.setMetaData(imageList.get(i).get(Function.KEY_PATH), getApplicationContext(), tag_item, description_text.getText().toString());
-                                        galleryGridView.setAdapter(AlbumActivity.adapter);
+                                        //sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(filename_jpg))));
+
 
 
 
@@ -263,26 +266,33 @@ public class AlbumActivity extends AppCompatActivity {
                             //Toast.makeText(getApplicationContext(), setData, Toast.LENGTH_LONG).show();
                             DatabaseHelper dbhelper = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
 
-//                            Boolean c = dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex);
+                            Boolean c = dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex);
                             Cursor cur = dbhelper.getLASTTAGGED(album_name);
                             ArrayList<String> row = new ArrayList<>();
                             while (cur.moveToNext()) {
                                 row.add(cur.getString(0));
                             }
+                            if(cur.getCount()>0)
                             if(Integer.parseInt(row.get(0))>lastTaggedIndex)
                                 lastTaggedIndex = Integer.parseInt(row.get(0));
-
+                            else
+                                dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex);
                             System.out.println("Last Index is set to " + lastTaggedIndex);
                             //Delete untagged before this index
                         }
                             showMultiple_options=0;
                             select_all=0;
+
+                            //tagsareAssigned=1;
+                            AlbumActivity.adapter = new SingleAlbumAdapter(AlbumActivity.this, imageList);
+                            galleryGridView.setAdapter(AlbumActivity.adapter);
                             finish();
                             startActivity(getIntent());
                     }
                     });
                     alert.show();
                 }
+
             }
         });
 
@@ -537,7 +547,8 @@ public class AlbumActivity extends AppCompatActivity {
             optionsMenu.close(true);
         }
         else{
-
+            DatabaseHelper dbhelper1 = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
+            Boolean c = dbhelper1.SAVE_LAST_TAGGED(album_name, 0);
             super.onBackPressed();
         }
 
