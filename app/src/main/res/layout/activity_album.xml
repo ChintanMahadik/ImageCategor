@@ -70,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/multiselect_white"
-            fab:fab_label="Select Multiple"
+            fab:fab_label="Select All"
             fab:fab_size="mini" />
 
         <com.github.clans.fab.FloatingActionButton

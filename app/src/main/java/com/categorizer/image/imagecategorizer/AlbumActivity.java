@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -50,10 +51,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class AlbumActivity extends AppCompatActivity {
     GridView galleryGridView;
-    static ArrayList<HashMap<String, String>> imageList = new ArrayList<HashMap<String, String>>();
+    static ArrayList<HashMap<String, String>> imageList = new ArrayList<>();
     static ArrayList<String> imageList_Selected = new ArrayList<String>();
     static String album_name = "";
     LoadAlbumImages loadAlbumTask;
@@ -81,6 +83,7 @@ public class AlbumActivity extends AppCompatActivity {
     static int deleted=0;
     static int select_all=0;
     static int tagsareAssigned=0;
+    static int mintaggedIndex=0;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -149,7 +152,7 @@ public class AlbumActivity extends AppCompatActivity {
         }
         assignTag.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 if(imageList_Selected.size()==0){
                     Snackbar.make(view, "Please Select At least One Image", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 }
@@ -222,10 +225,15 @@ public class AlbumActivity extends AppCompatActivity {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            System.out.println("Total Size of array list to assign Tag "+imageList_Selected.size());
+                            if((tag_item == null))
+                            {
+                                Snackbar.make(view, "Either Tag or Description is Empty", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                            }
+                            else{
+                            System.out.println("Total Size of array list to assign Tag " + imageList_Selected.size());
                             for (int i = 0; i < imageList_Selected.size(); i++) {
 
-                            try {
+                                try {
 
 
                                     if (imageList_Selected.get(i).endsWith(".png")) {
@@ -253,41 +261,45 @@ public class AlbumActivity extends AppCompatActivity {
                                         //sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(filename_jpg))));
 
 
-
-
                                     } else {
                                         setData = imd.setMetaData(imageList_Selected.get(i), getApplicationContext(), tag_item, description_text.getText().toString());
                                     }
 
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            //Toast.makeText(getApplicationContext(), setData, Toast.LENGTH_LONG).show();
-                            DatabaseHelper dbhelper = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                //Toast.makeText(getApplicationContext(), setData, Toast.LENGTH_LONG).show();
+                                DatabaseHelper dbhelper = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
 
-                            Boolean c = dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex);
-                            Cursor cur = dbhelper.getLASTTAGGED(album_name);
-                            ArrayList<String> row = new ArrayList<>();
-                            while (cur.moveToNext()) {
-                                row.add(cur.getString(0));
+                                //Boolean c = dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex);
+                                Cursor cur = dbhelper.getLASTTAGGED(album_name);
+                                ArrayList<String> row = new ArrayList<>();
+                                while (cur.moveToNext()) {
+                                    row.add(cur.getString(0));
+                                }
+                                if (cur.getCount() > 0) {
+                                    if (Integer.parseInt(row.get(0)) > lastTaggedIndex) {
+                                        lastTaggedIndex = Integer.parseInt(row.get(0));
+                                        System.out.println("Index Greater Assigned to " + lastTaggedIndex);
+                                    } else {
+                                        dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex);
+                                    }
+                                } else
+                                    dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex);
+
+                                System.out.println("Assigned Index" + lastTaggedIndex);
+                                //Delete untagged before this index
                             }
-                            if(cur.getCount()>0)
-                            if(Integer.parseInt(row.get(0))>lastTaggedIndex)
-                                lastTaggedIndex = Integer.parseInt(row.get(0));
-                            else
-                                dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex);
-                            System.out.println("Last Index is set to " + lastTaggedIndex);
-                            //Delete untagged before this index
-                        }
-                            showMultiple_options=0;
-                            select_all=0;
+                            showMultiple_options = 0;
+                            select_all = 0;
 
                             //tagsareAssigned=1;
                             AlbumActivity.adapter = new SingleAlbumAdapter(AlbumActivity.this, imageList);
                             galleryGridView.setAdapter(AlbumActivity.adapter);
                             finish();
                             startActivity(getIntent());
+                        }
                     }
                     });
                     alert.show();
@@ -302,7 +314,7 @@ public class AlbumActivity extends AppCompatActivity {
                 if(imageList_Selected.size()>0)
                 {
 
-                LinearLayout layout = new LinearLayout(AlbumActivity.this);
+                final LinearLayout layout = new LinearLayout(AlbumActivity.this);
                 layout.setOrientation(LinearLayout.VERTICAL);
                 layout.setPadding(50, 0, 50, 50);
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -321,6 +333,7 @@ public class AlbumActivity extends AppCompatActivity {
                                 exifInterface.setAttribute(ExifInterface.TAG_MAKE, null);
                                 exifInterface.setAttribute("UserComment", null);
                                 exifInterface.saveAttributes();
+
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -328,6 +341,32 @@ public class AlbumActivity extends AppCompatActivity {
                         //Toast.makeText(GalleryPreview.this,exifInterface.getAttribute(ExifInterface.TAG_MAKE),Toast.LENGTH_SHORT).show();
                         Snackbar.make(view, "Tag Removed Successfully", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
+
+                        DatabaseHelper dbhelper = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
+                        Cursor cur = dbhelper.getLASTTAGGED(album_name);
+                        ArrayList<String> row = new ArrayList<>();
+                        while (cur.moveToNext()) {
+                            row.add(cur.getString(0));
+                        }
+
+                        String tagged=null;
+                        if(cur.getCount()>0) {
+                            tagged = imageList.get(Integer.parseInt(row.get(0))).get(Function.KEY_PATH);
+                            if (Integer.parseInt(row.get(0)) <= lastTaggedIndex && imageList_Selected.contains(tagged))
+                                dbhelper.SAVE_LAST_TAGGED(album_name, 0);
+                            else
+                                lastTaggedIndex = Integer.parseInt(row.get(0));
+                        }
+                        else
+                            dbhelper.SAVE_LAST_TAGGED(album_name, 0);
+
+                        Cursor cur2 = dbhelper.getLASTTAGGED(album_name);
+                        ArrayList<String> row2 = new ArrayList<>();
+                        while (cur2.moveToNext()) {
+                            row2.add(cur2.getString(0));
+                        }
+                        lastTaggedIndex = Integer.parseInt(row2.get(0));
+                        System.out.println("Removed Index" + lastTaggedIndex);
 
                         dialogInterface.dismiss();
                     }
@@ -342,21 +381,7 @@ public class AlbumActivity extends AppCompatActivity {
 
                 alert.show();
 
-                    DatabaseHelper dbhelper = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
 
-                    Cursor cur = dbhelper.getLASTTAGGED(album_name);
-                    ArrayList<String> row = new ArrayList<>();
-                    while (cur.moveToNext()) {
-                        row.add(cur.getString(0));
-                    }
-                    if(Integer.parseInt(row.get(0))>lastTaggedIndex)
-                        lastTaggedIndex = Integer.parseInt(row.get(0));
-                    else
-                        dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex+1);
-
-                    System.out.println("Last Index is set to " + lastTaggedIndex);
-                    System.out.println("Initial Last Index is set to " + lastTaggedIndex);
-                System.out.println("Removed till "+lastTaggedIndex);
             }
             else{
                     Snackbar.make(view, "Please Select At least One Image", Snackbar.LENGTH_LONG)
@@ -370,6 +395,15 @@ public class AlbumActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                LinearLayout layout = new LinearLayout(AlbumActivity.this);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.setPadding(50, 0, 50, 50);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(500, 500);
+                layout.setLayoutParams(lp);
+                ///////////////////////////////////////////////////////////////
+
+                alert = new AlertDialog.Builder(AlbumActivity.this);
+                alert.setTitle("Are you sure you want to Delete UnTagged Images ?");
 
                 DatabaseHelper dbhelper = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
                 Cursor cur = dbhelper.getLASTTAGGED(album_name);
@@ -377,47 +411,92 @@ public class AlbumActivity extends AppCompatActivity {
                 while (cur.moveToNext()) {
                     row.add(cur.getString(0));
                 }
-                lastTaggedIndex = Integer.parseInt(row.get(0));
-                System.out.println("Initial Last Index is set to " + lastTaggedIndex);
-
-                for (int i = 0; i < lastTaggedIndex; i++) {
-                    //sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
-                    try {
-                        ExifInterface exifInterface = new ExifInterface(imageList.get(i).get(Function.KEY_PATH).toString());
-                        String tag = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
-                        System.out.println("Tag name is " + tag);
-                        if (tag == null) {
-                            File f = new File(imageList.get(i).get(Function.KEY_PATH));
-                            f.delete();
-                            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
-                            imageList.get(i).remove(Function.KEY_PATH);
-                            AlbumActivity.adapter = new SingleAlbumAdapter(AlbumActivity.this, imageList);
-                        }
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    DatabaseHelper dbhelper1 = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
-                    Boolean c = dbhelper1.SAVE_LAST_TAGGED(album_name, 0);
-                    Cursor cur1 = dbhelper1.getLASTTAGGED(album_name);
-                    ArrayList<String> row1 = new ArrayList<>();
-                    while (cur1.moveToNext()) {
-                        row1.add(cur1.getString(0));
-                    }
+                if(cur.getCount()>0){
                     lastTaggedIndex = Integer.parseInt(row.get(0));
-                    System.out.println("Last Index is set to " + lastTaggedIndex);
-
                 }
-                //galleryGridView.setAdapter(adapter);
+                else
+                    lastTaggedIndex=0;
 
-                galleryGridView.setAdapter(AlbumActivity.adapter);
-                lastTaggedIndex = 0;
-                System.out.println("Last Index is " + lastTaggedIndex);
-                showMultiple_options=0;
-                deleted=1;
-                finish();
-                startActivity(getIntent());
+                if(lastTaggedIndex==0) {
+                    alert.setMessage("No Last Tagged Image Found");
+                }
+                else {
+                    alert.setMessage("Here is the Last Tagged Image");
+                    ImageView im=new ImageView(AlbumActivity.this);
+                    im.setImageURI(Uri.fromFile(new File(imageList.get(lastTaggedIndex).get(Function.KEY_PATH))));
+                    im.setLayoutParams(lp);
+                    layout.addView(im);
+                }
+                alert.setView(layout);
+                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int j) {
+                        DatabaseHelper dbhelper = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
+                        Cursor cur = dbhelper.getLASTTAGGED(album_name);
+                        ArrayList<String> row = new ArrayList<>();
+                        while (cur.moveToNext()) {
+                            row.add(cur.getString(0));
+                        }
+                        if(cur.getCount()>0){
+                            lastTaggedIndex = Integer.parseInt(row.get(0));
+                        }
+                        else
+                            lastTaggedIndex=0;
+
+
+
+                        System.out.println("Initial Last Index is set to " + lastTaggedIndex);
+                        int k=0;
+                        for (int i = 0; i < lastTaggedIndex; i++) {
+                            //sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imageList.get(i).get(Function.KEY_PATH).toString()))));
+                            try {
+                                ExifInterface exifInterface = new ExifInterface(imageList.get(i).get(Function.KEY_PATH).toString());
+                                String tag = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
+                                System.out.println("Tag name is " + tag);
+                                if (!row.contains(tag)) {
+                                    File f = new File(imageList.get(i).get(Function.KEY_PATH));
+                                    f.delete();
+                                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(f)));
+                                    imageList.get(i).remove(Function.KEY_PATH);
+
+                                    k++;
+                                }
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        DatabaseHelper dbhelper1 = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
+                        Boolean c = dbhelper1.SAVE_LAST_TAGGED(album_name, lastTaggedIndex-k);
+                        Cursor cur1 = dbhelper1.getLASTTAGGED(album_name);
+                        ArrayList<String> row1 = new ArrayList<>();
+                        while (cur1.moveToNext()) {
+                            row1.add(cur1.getString(0));
+                        }
+                        lastTaggedIndex = Integer.parseInt(row1.get(0));
+                        System.out.println("Deleted Untagged Index" + lastTaggedIndex);
+                        //galleryGridView.setAdapter(adapter);
+
+                        AlbumActivity.adapter = new SingleAlbumAdapter(AlbumActivity.this, imageList);
+                        galleryGridView.setAdapter(AlbumActivity.adapter);
+                        //lastTaggedIndex = 0;
+                        System.out.println("Last Index is " + lastTaggedIndex);
+                        showMultiple_options=0;
+                        deleted=1;
+                        finish();
+                        startActivity(getIntent());
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        dialogInterface.dismiss();
+                    }
+                });
+                alert.show();
+
 
 
             }
@@ -477,7 +556,7 @@ public class AlbumActivity extends AppCompatActivity {
                 imageList.add(Function.mappingInbox(album, path, timestamp, Function.converToTime(timestamp), null));
             }
             cursor.close();
-            Collections.sort(imageList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging photo album by timestamp decending
+            //Collections.sort(imageList, new MapComparator(Function.KEY_TIMESTAMP, "")); // Arranging photo album by timestamp decending
             return xml;
         }
 
@@ -487,8 +566,7 @@ public class AlbumActivity extends AppCompatActivity {
                 showMultiple_options=1;
                 adapter = new SingleAlbumAdapter(AlbumActivity.this, imageList);
                 galleryGridView.setAdapter(adapter);
-                int index = galleryGridView.getFirstVisiblePosition();
-                galleryGridView.setSelection(index);
+                imageList_Selected.clear();
             }
             else{
                 adapter_noCheck = new SingleAlbumAdapter_noCheck(AlbumActivity.this, imageList);
@@ -513,7 +591,7 @@ public class AlbumActivity extends AppCompatActivity {
                 {
                     showMultiple_options=1;
                     checked_item=i;
-                    lastTaggedIndex=i;
+                    //lastTaggedIndex=i;
                     select_all=0;
                     finish();
                     startActivity(getIntent());
@@ -548,7 +626,9 @@ public class AlbumActivity extends AppCompatActivity {
         }
         else{
             DatabaseHelper dbhelper1 = new DatabaseHelper(AlbumActivity.this, "LAST_TAGGED");
-            Boolean c = dbhelper1.SAVE_LAST_TAGGED(album_name, 0);
+            dbhelper1.TRUNC_TABLE();
+
+            //imageList_Selected.clear();
             super.onBackPressed();
         }
 
@@ -715,10 +795,11 @@ class SingleAlbumAdapter extends BaseAdapter {
                         checked_item.add(position);
                         finalHolder.checkBox.setChecked(true);
                         AlbumActivity.imageList_Selected.add(data.get(position).get(Function.KEY_PATH));
-                        if(position>=AlbumActivity.lastTaggedIndex){
+
+                        if(position>AlbumActivity.lastTaggedIndex)
                             AlbumActivity.lastTaggedIndex=position;
+
                             System.out.println("Last Index = " +AlbumActivity.lastTaggedIndex);
-                        }
 
                     }
                     else{

@@ -107,7 +107,7 @@ public class GalleryPreview extends AppCompatActivity {
 
         assignTag.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
 
                 {
                     alert = new AlertDialog.Builder(GalleryPreview.this);
@@ -177,46 +177,54 @@ public class GalleryPreview extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             try {
-                                if(path.endsWith(".png")){
-                                    //Toast.makeText(GalleryPreview.this,"This is PNG Image",Toast.LENGTH_SHORT).show();
-                                    File location = new File(path.substring(0,path.lastIndexOf(".")));
-                                    String fileName=path.substring(path.lastIndexOf("."));
-                                    File dest = new File(path);
-                                    FileInputStream fis;
-                                    fis = new FileInputStream(dest);
-                                    Bitmap img = BitmapFactory.decodeStream(fis);
 
-                                    String filename=path.substring(0,path.lastIndexOf("."));
-                                    String filename_jpg=filename+".jpg";
-                                    System.out.println("Filename is = "+filename_jpg);
-                                    OutputStream out=new FileOutputStream(filename_jpg);
-
-                                    if(img!=null) {
-                                        img.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                                        //img.recycle();
-                                    }
-                                    dest.delete();
-                                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(path))));
-
-                                    path=filename_jpg;
-                                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(path))));
-                                    Glide.with(GalleryPreview.this)
-                                            .load(new File(path)) // Uri of the picture
-                                            .into(GalleryPreviewImg);
-                                    exifInterface=new ExifInterface(path);
-                                    exifInterface.setAttribute(ExifInterface.TAG_MAKE,tag_item);
-                                    exifInterface.setAttribute("UserComment",description_text.getText().toString());
-                                    exifInterface.saveAttributes();
-
-                                    finish();
-                                    startActivity(getIntent().putExtra("path",path+";"+image_index));
-
-
+                                if((tag_item==null))
+                                {
+                                    Snackbar.make(view, "Either Tag or Description is Empty", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                                 }
                                 else {
-                                    exifInterface.setAttribute(ExifInterface.TAG_MAKE,tag_item);
-                                    exifInterface.setAttribute("UserComment",description_text.getText().toString());
-                                    exifInterface.saveAttributes();
+
+
+                                    if (path.endsWith(".png")) {
+                                        //Toast.makeText(GalleryPreview.this,"This is PNG Image",Toast.LENGTH_SHORT).show();
+                                        File location = new File(path.substring(0, path.lastIndexOf(".")));
+                                        String fileName = path.substring(path.lastIndexOf("."));
+                                        File dest = new File(path);
+                                        FileInputStream fis;
+                                        fis = new FileInputStream(dest);
+                                        Bitmap img = BitmapFactory.decodeStream(fis);
+
+                                        String filename = path.substring(0, path.lastIndexOf("."));
+                                        String filename_jpg = filename + ".jpg";
+                                        System.out.println("Filename is = " + filename_jpg);
+                                        OutputStream out = new FileOutputStream(filename_jpg);
+
+                                        if (img != null) {
+                                            img.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                                            //img.recycle();
+                                        }
+                                        dest.delete();
+                                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(path))));
+
+                                        path = filename_jpg;
+                                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(path))));
+                                        Glide.with(GalleryPreview.this)
+                                                .load(new File(path)) // Uri of the picture
+                                                .into(GalleryPreviewImg);
+                                        exifInterface = new ExifInterface(path);
+                                        exifInterface.setAttribute(ExifInterface.TAG_MAKE, tag_item);
+                                        exifInterface.setAttribute("UserComment", description_text.getText().toString());
+                                        exifInterface.saveAttributes();
+
+                                        finish();
+                                        startActivity(getIntent().putExtra("path", path + ";" + image_index));
+
+
+                                    } else {
+                                        exifInterface.setAttribute(ExifInterface.TAG_MAKE, tag_item);
+                                        exifInterface.setAttribute("UserComment", description_text.getText().toString());
+                                        exifInterface.saveAttributes();
+                                    }
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();

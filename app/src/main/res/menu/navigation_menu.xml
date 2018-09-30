@@ -8,6 +8,12 @@
     </item>
 
     <item
+        android:id="@+id/delete_tag"
+        android:title="Tags"
+        android:icon="@drawable/delete_tag">
+    </item>
+
+    <item
         android:id="@+id/tags_album"
         android:title="Tags Album"
         android:icon="@drawable/tag">
@@ -24,9 +30,22 @@
         android:title="About"
         android:icon="@drawable/about">
     </item>
+
+    <item
+        android:id="@+id/share"
+        android:title="Share App"
+        android:icon="@drawable/shareblack">
+    </item>
+    <item
+        android:id="@+id/donate"
+        android:title="Buy for no Ads"
+        android:icon="@drawable/donate">
+    </item>
+
     <item
         android:id="@+id/logo"
-        android:title="Logo"
-        android:icon="@drawable/logo">
+        android:title="Chintan Mahadik v1.0"
+        android:icon="@drawable/copyrights">
     </item>
+
 </menu>

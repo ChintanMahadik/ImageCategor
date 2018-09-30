@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -56,6 +57,7 @@ public class TagAlbumActivity extends AppCompatActivity {
     SearchImage searchImage;
     String album_name;
     static int refresh=0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

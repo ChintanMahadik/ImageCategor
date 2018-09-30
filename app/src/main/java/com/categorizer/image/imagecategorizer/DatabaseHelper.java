@@ -35,6 +35,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public boolean TRUNC_TABLE(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("delete from "+ TABLE_NAME1);
+        db.execSQL("delete from "+ TABLE_NAME2);
+        return true;
+    }
     public boolean addData(String item) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -49,6 +55,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } else {
             return true;
         }
+    }
+
+
+    public boolean deleteTag(String item) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String[] content=new String[1];
+        content[0]=item;
+        boolean result = db.delete(TABLE_NAME1, COL2 + "= '" + item +"'",null )>0;
+
+       return result;
     }
 
     public boolean SAVE_LAST_TAGGED(String folder_name,int index) {

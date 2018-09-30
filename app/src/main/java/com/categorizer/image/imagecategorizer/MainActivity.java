@@ -14,10 +14,12 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_PERMISSION_KEY = 1;
     LoadAlbum loadAlbumTask;
     GridView galleryGridView;
+    NavigationView navigationView;
    static  ArrayList<HashMap<String, String>> albumList = new ArrayList<HashMap<String, String>>();
 
     private DrawerLayout drawerLayout;
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //startActivity(new Intent(MainActivity.this,Myadd.class));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Gallery");
         drawerLayout=(DrawerLayout)findViewById(R.id.drawer);
@@ -60,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view );
+        navigationView = (NavigationView) findViewById(R.id.nav_view );
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -69,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
                      CreateTag_Popup createTag_popup=new CreateTag_Popup();
                      createTag_popup.DisplayPopup(MainActivity.this);
                  }
+                if(id==R.id.delete_tag){
+                    DeleteTag_Popup deleteTag_popup=new DeleteTag_Popup();
+                    deleteTag_popup.DisplayPopup(MainActivity.this);
+                }
                  if(id == R.id.tags_album){
                      String s="";
                      for(int i=0;i<albumList.size();i++){
@@ -85,10 +93,25 @@ public class MainActivity extends AppCompatActivity {
                      startActivity(new Intent(MainActivity.this,Search.class).putExtra("album_list", s));
                  }
                  if(id==R.id.about){
-                     Toast.makeText(MainActivity.this,"About",Toast.LENGTH_SHORT ).show();
+                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://redchillicrackers.com/"));
+                     startActivity(browserIntent);
                  }
                 if(id==R.id.logo){
-                    Toast.makeText(MainActivity.this,"Logo website Link",Toast.LENGTH_SHORT ).show();
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/search?q=chintan%20mahadik&hl=en"));
+                    startActivity(browserIntent);
+
+                }
+                if(id==R.id.donate){
+                    Toast.makeText(MainActivity.this,"This will redirect to Payment Page",Toast.LENGTH_SHORT).show();
+
+                }
+                if(id==R.id.share){
+                    Intent i = new Intent(android.content.Intent.ACTION_SEND);
+                    i.setType("text/plain");
+                    i.putExtra(android.content.Intent.EXTRA_SUBJECT, "Image Categorizer");
+                    i.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/search?q=chintan%20mahadik&hl=en");
+                    startActivity(Intent.createChooser(i, "Share via"));
+
                 }
 
                  return true;
@@ -172,6 +195,8 @@ public class MainActivity extends AppCompatActivity {
             galleryGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View view,
                                         final int position, long id) {
+                    DatabaseHelper dbhelper1 = new DatabaseHelper(MainActivity.this, "LAST_TAGGED");
+                    dbhelper1.TRUNC_TABLE();
                     Intent intent = new Intent(MainActivity.this, AlbumActivity.class);
                     intent.putExtra("name", albumList.get(+position).get(Function.KEY_ALBUM));
                     startActivity(intent);
@@ -202,7 +227,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onBackPressed() {
+            if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+                drawerLayout.closeDrawer(Gravity.LEFT);
+            }
+            else {
+                super.onBackPressed();
+            }
 
+    }
 
     @Override
     protected void onResume() {

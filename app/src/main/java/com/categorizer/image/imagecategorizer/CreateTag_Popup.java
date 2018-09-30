@@ -1,9 +1,11 @@
 package com.categorizer.image.imagecategorizer;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -28,7 +30,7 @@ public class CreateTag_Popup extends  AppCompatActivity{
 
 
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
-        LinearLayout layout = new LinearLayout(context);
+        final LinearLayout layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(50, 0, 50, 50);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
@@ -51,15 +53,18 @@ public class CreateTag_Popup extends  AppCompatActivity{
 
         alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
 
+            @SuppressLint("ResourceType")
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
                 DatabaseHelper dbhelper=new DatabaseHelper(context,"IMAGE_TAGS");
-                boolean insertData = dbhelper.addData(tag.getText().toString());
-
-                Toast.makeText(context, ""+insertData, Toast.LENGTH_SHORT).show();
-                CreateTag_Popup.flag=0;
-
+                if(!tag.getText().toString().isEmpty()) {
+                    boolean insertData = dbhelper.addData(tag.getText().toString());
+                    CreateTag_Popup.flag = 0;
+                }
+                else{
+                    Toast.makeText(context,"Tag cannot be Empty",Toast.LENGTH_SHORT).show();
+                }
             }
         });
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

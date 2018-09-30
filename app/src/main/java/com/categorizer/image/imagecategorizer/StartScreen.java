@@ -138,21 +138,21 @@ public class StartScreen extends AppCompatActivity {
         }
         //Arrays
         public int[] slide_images={
-                R.drawable.start_image_1,
-                R.drawable.start_image_1,
-                R.drawable.start_image_1
+                R.drawable.categorize,
+                R.drawable.search_start,
+                R.drawable.delete_start
         };
 
         public String[] slide_heading={
                 "Categorize",
                 "Search",
-                "Delete Unused"
+                "Delete UnTagged"
         };
 
         public String[] slide_desc={
-                "An image (from Latin: imago) is an artifact that depicts visual perception, for example, a photo or a two-dimensional picture, that has a similar appearance to some subject—usually a physical object or a person, thus providing a depiction of it. In context of image signal processing, an image is a distributed amplitude of color",
-                "An image (from Latin: imago) is an artifact that depicts visual perception, for example, a photo or a two-dimensional picture, that has a similar appearance to some subject—usually a physical object or a person, thus providing a depiction of it. In context of image signal processing, an image is a distributed amplitude of color",
-                "An image (from Latin: imago) is an artifact that depicts visual perception, for example, a photo or a two-dimensional picture, that has a similar appearance to some subject—usually a physical object or a person, thus providing a depiction of it. In context of image signal processing, an image is a distributed amplitude of color"
+                "Categorize images based on your own tags. Simple and Easy to use.",
+                "Search is based on Image Tags or Description Keywords.",
+                "Delete Untagged Images easily and quickly."
         };
 
         @Override
