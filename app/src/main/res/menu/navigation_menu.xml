@@ -3,13 +3,12 @@
 
     <item
         android:id="@+id/create_tag"
-        android:title="Tags"
+        android:title="Create Tags"
         android:icon="@drawable/create_tag">
     </item>
-
     <item
         android:id="@+id/delete_tag"
-        android:title="Tags"
+        android:title="Delete Tags"
         android:icon="@drawable/delete_tag">
     </item>
 
@@ -44,7 +43,7 @@
 
     <item
         android:id="@+id/logo"
-        android:title="Chintan Mahadik v1.0"
+        android:title="v1.0"
         android:icon="@drawable/copyrights">
     </item>
 

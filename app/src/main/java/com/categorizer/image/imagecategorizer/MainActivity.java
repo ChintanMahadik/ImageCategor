@@ -2,6 +2,8 @@ package com.categorizer.image.imagecategorizer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -24,16 +26,21 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,17 +51,22 @@ public class MainActivity extends AppCompatActivity {
     LoadAlbum loadAlbumTask;
     GridView galleryGridView;
     NavigationView navigationView;
-   static  ArrayList<HashMap<String, String>> albumList = new ArrayList<HashMap<String, String>>();
-
+    static  ArrayList<HashMap<String, String>> albumList = new ArrayList<HashMap<String, String>>();
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle toggle;
     static int refresh =0;
+    static String sfolderpaths;
+    ProgressBar pb;
+    static Spinner s;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        pb=(ProgressBar)findViewById(R.id.progressBar) ;
         //startActivity(new Intent(MainActivity.this,Myadd.class));
+
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Gallery");
         drawerLayout=(DrawerLayout)findViewById(R.id.drawer);
@@ -78,12 +90,9 @@ public class MainActivity extends AppCompatActivity {
                     deleteTag_popup.DisplayPopup(MainActivity.this);
                 }
                  if(id == R.id.tags_album){
-                     String s="";
-                     for(int i=0;i<albumList.size();i++){
-                         s+=albumList.get(i).get(Function.KEY_PATH)+",";
-                     }
+
                      System.out.println("Album size is "+albumList.size());
-                     startActivity(new Intent(MainActivity.this,ShowTags.class).putExtra("album_list", s));
+                     startActivity(new Intent(MainActivity.this,ShowTags.class).putExtra("album_list", sfolderpaths));
                  }
                  if(id==R.id.search){
                      String s="";
@@ -149,10 +158,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            pb.setVisibility(View.VISIBLE);
             albumList.clear();
         }
 
         protected String doInBackground(String... args) {
+
             String xml = "";
 
             String path = null;
@@ -182,7 +193,9 @@ public class MainActivity extends AppCompatActivity {
             }
             cursor.close();
             Collections.sort(albumList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging photo album by timestamp decending
+
             return xml;
+
         }
 
         @Override
@@ -202,6 +215,19 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
+
+            sfolderpaths="";
+            for(int i=0;i<albumList.size();i++){
+                sfolderpaths+=albumList.get(i).get(Function.KEY_PATH)+",";
+            }
+            System.out.println("All Paths are = "+sfolderpaths);
+            TaggedImagesInitializer ti=new TaggedImagesInitializer();
+            try {
+                ti.initialize(MainActivity.this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            pb.setVisibility(View.GONE);
         }
     }
 
@@ -249,20 +275,24 @@ public class MainActivity extends AppCompatActivity {
         }
         else if (refresh!=0){
             refresh=0;
+            pb.setVisibility(View.VISIBLE);
+            if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+                drawerLayout.closeDrawer(Gravity.LEFT);
+            }
             finish();
             startActivity(getIntent());
         }
         else
         {
+            pb.setVisibility(View.VISIBLE);
             loadAlbumTask = new LoadAlbum();
             loadAlbumTask.execute();
+
+
         }
-
     }
+
 }
-
-
-
 
 class AlbumAdapter extends BaseAdapter {
     private Activity activity;

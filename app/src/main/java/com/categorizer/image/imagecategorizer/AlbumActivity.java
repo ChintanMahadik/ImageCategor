@@ -297,6 +297,7 @@ public class AlbumActivity extends AppCompatActivity {
                             //tagsareAssigned=1;
                             AlbumActivity.adapter = new SingleAlbumAdapter(AlbumActivity.this, imageList);
                             galleryGridView.setAdapter(AlbumActivity.adapter);
+                            imageList_Selected.clear();
                             finish();
                             startActivity(getIntent());
                         }
@@ -442,7 +443,13 @@ public class AlbumActivity extends AppCompatActivity {
                         }
                         else
                             lastTaggedIndex=0;
-
+///////////////////////////////Get Tags from database//////////
+                        DatabaseHelper dbhelpert=new DatabaseHelper(AlbumActivity.this,"IMAGE_TAGS");
+                        Cursor ct= dbhelpert.getData();
+                        ArrayList<String> tagList = new ArrayList<>();
+                        while(ct.moveToNext()){
+                            tagList.add(ct.getString(0));
+                        }
 
 
                         System.out.println("Initial Last Index is set to " + lastTaggedIndex);
@@ -453,7 +460,8 @@ public class AlbumActivity extends AppCompatActivity {
                                 ExifInterface exifInterface = new ExifInterface(imageList.get(i).get(Function.KEY_PATH).toString());
                                 String tag = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
                                 System.out.println("Tag name is " + tag);
-                                if (!row.contains(tag)) {
+                                System.out.println("Row size is " + tagList.size());
+                                if (!tagList.contains(tag)) {
                                     File f = new File(imageList.get(i).get(Function.KEY_PATH));
                                     f.delete();
                                     sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(f)));

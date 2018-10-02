@@ -9,8 +9,8 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_centerInParent="true"
         app:srcCompat="@drawable/icon4"
         tools:layout_editor_absoluteX="105dp"
@@ -20,9 +20,8 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/imageView"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="55dp"
         android:text="Image Categorizer"
         android:textColor="@android:color/white"
         android:textSize="24sp" />
@@ -39,12 +38,4 @@
         android:textSize="14sp"
         android:typeface="monospace" />
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/textView3"
-        android:layout_centerHorizontal="true"
-        android:text="Copyrights@Chintan"
-        android:textColor="@android:color/white" />
 </RelativeLayout>

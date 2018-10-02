@@ -38,5 +38,15 @@
         android:layout_alignEnd="@+id/textView"
         app:srcCompat="@drawable/icon4" />
 
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/textView"
+        android:layout_below="@+id/textView"
+        android:layout_marginTop="-33dp"
+        android:text="Chintan-Shrinivas @ Copyrights"
+        android:textColor="@android:color/white"/>
+
 
 </RelativeLayout>

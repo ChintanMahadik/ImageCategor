@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class Search extends AppCompatActivity {
 
@@ -37,29 +38,66 @@ public class Search extends AppCompatActivity {
     GridView imagesGridView;
     Button search;
     Intent intent=null;
-    private ProgressBar pgsBar;
-
+    //private ProgressBar pgsBar;
+    static SingleAlbumAdapter_noCheck adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         getSupportActionBar().hide();
         intent = getIntent();
-        pgsBar = (ProgressBar) findViewById(R.id.pBar);
+        //pgsBar = (ProgressBar) findViewById(R.id.pBar);
         search=(Button)findViewById(R.id.button);
         search_text = (EditText) findViewById(R.id.search);
+        SearchImage si = new SearchImage();
+        //si.execute();
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SearchImage si = new SearchImage();
+
                 if(search_text.getText().toString().isEmpty()){
                     Snackbar.make(view, "Search Field is Empty", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 }
                 else {
-                    si.execute();
+                    all_ImageList_toDisplay.clear();
+                    for (int i = 0; i < all_ImageList.size(); i++) {
+                        try {
+
+                            ExifInterface exifInterface = new ExifInterface(all_ImageList.get(i).get(Function.KEY_PATH).toString());
+                            String tag = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
+                            String desc = exifInterface.getAttribute("UserComment");
+
+
+                            if (tag != null)
+                                if (desc != null) {
+                                    if (tag.equalsIgnoreCase(search_text.getText().toString()) || Pattern.compile(Pattern.quote(search_text.getText().toString()), Pattern.CASE_INSENSITIVE).matcher(desc).find()) {
+                                        all_ImageList_toDisplay.add(all_ImageList.get(i));
+                                    }
+                                } else {
+                                    if (tag.equalsIgnoreCase(search_text.getText().toString())) {
+                                        all_ImageList_toDisplay.add(all_ImageList.get(i));
+                                    }
+                                }
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    adapter = new SingleAlbumAdapter_noCheck(Search.this, all_ImageList_toDisplay);
+
+                    imagesGridView.setAdapter(adapter);
+                    imagesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        public void onItemClick(AdapterView<?> parent, View view,
+                                                final int position, long id) {
+                            Intent intent = new Intent(Search.this, GalleryPreview.class);
+                            intent.putExtra("path", all_ImageList_toDisplay.get(+position).get(Function.KEY_PATH)+","+position);
+                            startActivity(intent);
+                        }
+                    });
                 }
             }
         });
+        MainActivity.refresh=1;
     }
 
     class SearchImage extends AsyncTask<String, Void, String> {
@@ -67,7 +105,7 @@ public class Search extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pgsBar.setVisibility(View.VISIBLE);
+            //pgsBar.setVisibility(View.VISIBLE);
             all_ImageList.clear();
             all_ImageList_toDisplay.clear();
         }
@@ -82,7 +120,6 @@ public class Search extends AppCompatActivity {
             for (int i = 0; i < album_paths.length; i++) {
                 album_paths_folder[i] = album_paths[i].substring(0, album_paths[i].lastIndexOf("/"));
             }
-
 
             imagesGridView = (GridView) findViewById(R.id.searchedImages);
             int iDisplayWidth = getResources().getDisplayMetrics().widthPixels;
@@ -126,29 +163,7 @@ public class Search extends AppCompatActivity {
                     Collections.sort(all_ImageList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging photo album by timestamp decending
                 }
 
-                for (int i = 0; i < all_ImageList.size(); i++) {
-                    try {
 
-                        ExifInterface exifInterface = new ExifInterface(all_ImageList.get(i).get(Function.KEY_PATH).toString());
-                        String tag = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
-                        String desc = exifInterface.getAttribute("UserComment");
-
-
-                        if (tag != null)
-                            if (desc != null) {
-                                if (tag.equalsIgnoreCase(search_text.getText().toString()) || desc.contains(search_text.getText().toString())) {
-                                    all_ImageList_toDisplay.add(all_ImageList.get(i));
-                                }
-                            } else {
-                                if (tag.equalsIgnoreCase(search_text.getText().toString())) {
-                                    all_ImageList_toDisplay.add(all_ImageList.get(i));
-                                }
-                            }
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
 
             return xml;
 
@@ -157,18 +172,8 @@ public class Search extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String xml) {
-            pgsBar.setVisibility(View.GONE);
-            SingleAlbumAdapter_noCheck adapter = new SingleAlbumAdapter_noCheck(Search.this, all_ImageList_toDisplay);
-            imagesGridView.setAdapter(adapter);
+            //pgsBar.setVisibility(View.GONE);
 
-            imagesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View view,
-                                        final int position, long id) {
-                    Intent intent = new Intent(Search.this, GalleryPreview.class);
-                    intent.putExtra("path", all_ImageList_toDisplay.get(+position).get(Function.KEY_PATH)+","+position);
-                    startActivity(intent);
-                }
-            });
         }
 
 

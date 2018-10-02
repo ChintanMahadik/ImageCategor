@@ -92,7 +92,7 @@ public class TagAlbumActivity extends AppCompatActivity {
             int len=paths.length;
             String title=paths[len-2].toString();
             System.out.println("Title is "+title);
-           // setTitle(title);
+            setTitle(title);
             System.out.println(paths[len-1]);
             ExifInterface exifInterface=null;
             String tag_name=null;
