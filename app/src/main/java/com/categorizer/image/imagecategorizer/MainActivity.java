@@ -90,9 +90,7 @@ public class MainActivity extends AppCompatActivity {
                     deleteTag_popup.DisplayPopup(MainActivity.this);
                 }
                  if(id == R.id.tags_album){
-
-                     System.out.println("Album size is "+albumList.size());
-                     startActivity(new Intent(MainActivity.this,ShowTags.class).putExtra("album_list", sfolderpaths));
+                     startActivity(new Intent(MainActivity.this,ShowTags.class));
                  }
                  if(id==R.id.search){
                      String s="";
@@ -176,10 +174,8 @@ public class MainActivity extends AppCompatActivity {
 
             String[] projection = { MediaStore.MediaColumns.DATA,
                     MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.MediaColumns.DATE_MODIFIED };
-            Cursor cursorExternal = getContentResolver().query(uriExternal, projection, "_data IS NOT NULL) GROUP BY (bucket_display_name",
-                    null, null);
-            Cursor cursorInternal = getContentResolver().query(uriInternal, projection, "_data IS NOT NULL) GROUP BY (bucket_display_name",
-                    null, null);
+            Cursor cursorExternal = getContentResolver().query(uriExternal, projection, "_data IS NOT NULL) GROUP BY (bucket_display_name", null, null);
+            Cursor cursorInternal = getContentResolver().query(uriInternal, projection, "_data IS NOT NULL) GROUP BY (bucket_display_name", null, null);
             Cursor cursor = new MergeCursor(new Cursor[]{cursorExternal,cursorInternal});
 
             while (cursor.moveToNext()) {
@@ -216,17 +212,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            sfolderpaths="";
-            for(int i=0;i<albumList.size();i++){
-                sfolderpaths+=albumList.get(i).get(Function.KEY_PATH)+",";
-            }
-            System.out.println("All Paths are = "+sfolderpaths);
-            TaggedImagesInitializer ti=new TaggedImagesInitializer();
-            try {
-                ti.initialize(MainActivity.this);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            sfolderpaths="";
+//            for(int i=0;i<albumList.size();i++){
+//                sfolderpaths+=albumList.get(i).get(Function.KEY_PATH)+",";
+//            }
+//            System.out.println("All Paths are = "+sfolderpaths);
+////            TaggedImagesInitializer ti=new TaggedImagesInitializer();
+////            try {
+////                ti.initialize(MainActivity.this);
+////            } catch (IOException e) {
+////                e.printStackTrace();
+////            }
             pb.setVisibility(View.GONE);
         }
     }

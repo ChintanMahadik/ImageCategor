@@ -41,28 +41,56 @@ public class ShowTags extends AppCompatActivity {
         setContentView(R.layout.activity_show_tags);
         tagsGridView = (GridView) findViewById(R.id.showTags);
 
-        AlbumAdapter adapter = new AlbumAdapter(ShowTags.this, all_ImageList_toDisplay);
-        tagsGridView.setAdapter(adapter);
-
-       tagsGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-           public void onItemClick(AdapterView<?> parent, View view,
-                                    final int position, long id) {
-                String s="";
-                for(int i=0;i<all_ImageList.size();i++){
-                    s+=all_ImageList.get(i).get(Function.KEY_PATH).toString()+",";
-                }
-                s+=all_ImageList_toDisplay.get(position).get(Function.KEY_ALBUM)+",";
-                s+=all_ImageList_toDisplay.get(position).get(Function.KEY_TIMESTAMP)+",";
-                Intent intent = new Intent(ShowTags.this, TagAlbumActivity.class);
-                intent.putExtra("album_list", s);
-                startActivity(intent);
-            }
-        });
-
-       MainActivity.refresh=1;
+        LoadAllImages li=new LoadAllImages();
+        li.execute();
+        MainActivity.refresh=1;
     }
 
+    class LoadAllImages extends AsyncTask<String, Void, String> {
 
+        @Override
+        protected void onPreExecute() {
+            pgsBar=(ProgressBar)findViewById(R.id.pBar);
+            pgsBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try {
+                TaggedImagesInitializer.initialize(ShowTags.this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "";
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            AlbumAdapter adapter = new AlbumAdapter(ShowTags.this, all_ImageList_toDisplay);
+            tagsGridView.setAdapter(adapter);
+
+            tagsGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View view,
+                                        final int position, long id) {
+
+
+                    String s="";
+                    for(int i=0;i<all_ImageList.size();i++){
+                        s+=all_ImageList.get(i).get(Function.KEY_PATH).toString()+",";
+                    }
+                    s+=all_ImageList_toDisplay.get(position).get(Function.KEY_ALBUM)+",";
+                    s+=all_ImageList_toDisplay.get(position).get(Function.KEY_TIMESTAMP)+",";
+                    Intent intent = new Intent(ShowTags.this, TagAlbumActivity.class);
+                    intent.putExtra("album_list", s);
+                    startActivity(intent);
+                    tagsGridView.setEnabled(false);
+                }
+            });
+
+
+            pgsBar.setVisibility(View.GONE);
+        }
+    }
 
     @Override
     public void onResume()
@@ -70,11 +98,6 @@ public class ShowTags extends AppCompatActivity {
         super.onResume();
         if(refresh!=0) {
             refresh=0;
-            try {
-                TaggedImagesInitializer.initialize(ShowTags.this);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             finish();
             startActivity(getIntent());
         }

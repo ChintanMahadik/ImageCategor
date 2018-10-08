@@ -287,7 +287,7 @@ public class AlbumActivity extends AppCompatActivity {
                                     }
                                 } else
                                     dbhelper.SAVE_LAST_TAGGED(album_name, lastTaggedIndex);
-
+                                    cur.close();
                                 System.out.println("Assigned Index" + lastTaggedIndex);
                                 //Delete untagged before this index
                             }
@@ -349,7 +349,7 @@ public class AlbumActivity extends AppCompatActivity {
                         while (cur.moveToNext()) {
                             row.add(cur.getString(0));
                         }
-
+                        cur.close();
                         String tagged=null;
                         if(cur.getCount()>0) {
                             tagged = imageList.get(Integer.parseInt(row.get(0))).get(Function.KEY_PATH);
@@ -366,6 +366,7 @@ public class AlbumActivity extends AppCompatActivity {
                         while (cur2.moveToNext()) {
                             row2.add(cur2.getString(0));
                         }
+                        cur2.close();
                         lastTaggedIndex = Integer.parseInt(row2.get(0));
                         System.out.println("Removed Index" + lastTaggedIndex);
 
@@ -428,6 +429,7 @@ public class AlbumActivity extends AppCompatActivity {
                     im.setLayoutParams(lp);
                     layout.addView(im);
                 }
+                cur.close();
                 alert.setView(layout);
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
@@ -443,6 +445,7 @@ public class AlbumActivity extends AppCompatActivity {
                         }
                         else
                             lastTaggedIndex=0;
+                        cur.close();
 ///////////////////////////////Get Tags from database//////////
                         DatabaseHelper dbhelpert=new DatabaseHelper(AlbumActivity.this,"IMAGE_TAGS");
                         Cursor ct= dbhelpert.getData();
@@ -450,7 +453,7 @@ public class AlbumActivity extends AppCompatActivity {
                         while(ct.moveToNext()){
                             tagList.add(ct.getString(0));
                         }
-
+                        ct.close();
 
                         System.out.println("Initial Last Index is set to " + lastTaggedIndex);
                         int k=0;
@@ -481,6 +484,7 @@ public class AlbumActivity extends AppCompatActivity {
                         while (cur1.moveToNext()) {
                             row1.add(cur1.getString(0));
                         }
+                        cur1.close();
                         lastTaggedIndex = Integer.parseInt(row1.get(0));
                         System.out.println("Deleted Untagged Index" + lastTaggedIndex);
                         //galleryGridView.setAdapter(adapter);
