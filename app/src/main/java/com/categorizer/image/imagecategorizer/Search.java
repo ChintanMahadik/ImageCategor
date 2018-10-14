@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import static com.categorizer.image.imagecategorizer.TaggedImagesInitializer.all_ImageList_toDisplay;
 import static com.categorizer.image.imagecategorizer.TaggedImagesInitializer.all_ImageList;
+import static com.categorizer.image.imagecategorizer.TaggedImagesInitializer.exifDataList;
 
 public class Search extends AppCompatActivity {
 
@@ -47,6 +48,8 @@ public class Search extends AppCompatActivity {
         getSupportActionBar().hide();
         intent = getIntent();
         pgsBar = (ProgressBar) findViewById(R.id.pBar);
+
+
         search=(Button)findViewById(R.id.button);
         search_text = (EditText) findViewById(R.id.search);
 
@@ -54,7 +57,6 @@ public class Search extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 search.setEnabled(false);
-                pgsBar.setVisibility(View.VISIBLE);
                 SearchImage si = new SearchImage();
                 si.execute();
                 search.setEnabled(true);
@@ -69,7 +71,9 @@ public class Search extends AppCompatActivity {
 
             imagesGridView = (GridView) findViewById(R.id.searchedImages);
             try {
-                TaggedImagesInitializer.initialize(Search.this);
+                TaggedImagesInitializer.doit=1;
+                pgsBar.setVisibility(View.VISIBLE);
+                TaggedImagesInitializer.initialize_List(Search.this);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -93,9 +97,10 @@ public class Search extends AppCompatActivity {
             }
             else {
                 all_ImageList_toDisplay.clear();
-                for (int i = 0; i < all_ImageList.size(); i++) {
-                    try {
-                        ExifInterface exifInterface = new ExifInterface(all_ImageList.get(i).get(Function.KEY_PATH).toString());
+                for (int i = 0; i < exifDataList.size(); i++) {
+
+
+                        ExifInterface exifInterface = exifDataList.get(i);
                         String tag = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
                         String desc = exifInterface.getAttribute("UserComment");
                         if (tag != null)
@@ -108,9 +113,6 @@ public class Search extends AppCompatActivity {
                                     all_ImageList_toDisplay.add(all_ImageList.get(i));
                                 }
                             }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
                 adapter = new SingleAlbumAdapter_noCheck(Search.this, all_ImageList_toDisplay);
             }

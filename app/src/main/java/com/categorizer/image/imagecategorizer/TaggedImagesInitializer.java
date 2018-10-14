@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,19 +24,15 @@ public class TaggedImagesInitializer
     static ArrayList<HashMap<String, String>> all_ImageList_toDisplay = new ArrayList<HashMap<String, String>>();
     static HashMap<String,String> exifDataMap = new HashMap<>();
     static LinkedList<String> exifDataPath = new LinkedList<>();
-    public static void initialize(Context context) throws IOException {
-        {
+    static LinkedList<ExifInterface> exifDataList=new LinkedList<>();
+    static int doit=0;
+    public static void initialize_List(Context context) throws IOException {
+
             all_ImageList.clear();
             all_ImageList_toDisplay.clear();
             exifDataMap.clear();
             exifDataPath.clear();
-            String xml = "";
-//            String s = MainActivity.sfolderpaths;
-//            String album_paths[]=s.split(",");
-//            String album_paths_folder[]=new String[album_paths.length];
-//            System.out.println("Inside Inilializer "+album_paths);
-
-
+            exifDataList.clear();
                 String path = null;
                 String album = null;
                 String timestamp = null;
@@ -51,13 +48,35 @@ public class TaggedImagesInitializer
                     album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
                     timestamp = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED));
                     all_ImageList.add(Function.mappingInbox(album, path, timestamp, Function.converToTime(timestamp), countPhoto));
-                    exifDataMap.put(new ExifInterface(path).getAttribute(ExifInterface.TAG_MAKE), path);
-                    exifDataPath.add(new ExifInterface(path).getAttribute(ExifInterface.TAG_MAKE));
+
+                    if(doit==1){
+                    ExifInterface exifInterface=new ExifInterface(path);
+                    String pathexif=exifInterface.getAttribute(ExifInterface.TAG_MAKE);
+                    exifDataMap.put(pathexif, path);
+                    exifDataPath.add(pathexif);
+
+                        exifDataList.add(new ExifInterface(path));
+                    }
+
+                }
+                System.out.println("Hi looping done");
+                if(doit==1){
+                 doit=0;
                 }
                 cursor.close();
-                Collections.sort(all_ImageList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging photo album by timestamp decending
+                //Collections.sort(all_ImageList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging photo album by timestamp decending
 
-////////////////////Calling Database list of tags//////////////////////////////
+
+        }
+        public static void initialize_tags(Context context) throws IOException {
+
+                all_ImageList.clear();
+                all_ImageList_toDisplay.clear();
+                exifDataMap.clear();
+                exifDataPath.clear();
+
+            initialize_List(context);
+            ////////////////////Calling Database list of tags//////////////////////////////
             DatabaseHelper dbhelper=new DatabaseHelper(context,"IMAGE_TAGS");
             Cursor c= dbhelper.getData();
             ArrayList<String> tagList = new ArrayList<>();
@@ -74,17 +93,19 @@ public class TaggedImagesInitializer
                 String timestamp2 = null;
                 int countPhoto2 = 0;
 
-                if(exifDataMap.containsKey(tagList.get(i))){
+//                if(exifDataMap.containsKey(tagList.get(i))){
 
-                    path2=exifDataMap.get(tagList.get(i));
+                    //path2=exifDataMap.get(tagList.get(i));
                     album2=tagList.get(i);
                     timestamp2=all_ImageList.get(i).get(Function.KEY_TIMESTAMP);
-                    countPhoto2=Collections.frequency(exifDataPath, tagList.get(i));
+                    //countPhoto2=Collections.frequency(exifDataPath, tagList.get(i));
                     all_ImageList_toDisplay.add(Function.mappingInbox(album2,path2 , timestamp2, Function.converToTime(timestamp2), Integer.toString(countPhoto2)));
 
-                }
+//                }
 
             }
+
+
         }
-    }
+
 }

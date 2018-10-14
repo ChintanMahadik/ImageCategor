@@ -240,6 +240,7 @@ public class GalleryPreview extends AppCompatActivity {
                             while(cur.moveToNext()){
                                 row.add(cur.getString(0));
                             }
+                            cur.close();
                             AlbumActivity.lastTaggedIndex=Integer.parseInt(row.get(0));
                         }
                     });

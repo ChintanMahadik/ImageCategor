@@ -54,11 +54,14 @@ public class TagAlbumActivity extends AppCompatActivity {
     Button search;
     Intent intent=null;
     private ProgressBar pgsBar;
-    SearchImage searchImage;
+    SearchImage2 searchImage;
     String album_name;
     static int refresh=0;
-
-
+    ExifInterface exifInterface=null;
+    String tag_name=null;
+    int len=0;
+    String paths[]=null;
+    String title=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,18 +69,27 @@ public class TagAlbumActivity extends AppCompatActivity {
 //        /getSupportActionBar().hide();
         intent = getIntent();
         imagesGridView=(GridView)findViewById(R.id.displayTagImages) ;
-        searchImage = new SearchImage();
+        pgsBar=(ProgressBar)findViewById(R.id.pBar) ;
+        searchImage = new SearchImage2();
+        String s = intent.getStringExtra("album_list");
+         paths=s.split(",");
+         len=paths.length;
+         title=paths[len-2].toString();
+        System.out.println("Title is "+title);
+        setTitle(title);
+        System.out.println(paths[len-1]);
+
         searchImage.execute();
 
         ShowTags.refresh=1;
     }
 
-    class SearchImage extends AsyncTask<String, Void, String>{
+    class SearchImage2 extends AsyncTask<String, Void, String>{
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-//            pgsBar.setVisibility(View.VISIBLE);
+           pgsBar.setVisibility(View.VISIBLE);
             all_ImageList.clear();
             all_Tag_ImageList_toDisplay.clear();
         }
@@ -86,16 +98,16 @@ public class TagAlbumActivity extends AppCompatActivity {
         protected String doInBackground(String... strings) {
 
             String xml = "";
-            String s = intent.getStringExtra("album_list");
 
-            String paths[]=s.split(",");
-            int len=paths.length;
-            String title=paths[len-2].toString();
-            System.out.println("Title is "+title);
-            setTitle(title);
-            System.out.println(paths[len-1]);
-            ExifInterface exifInterface=null;
-            String tag_name=null;
+            int iDisplayWidth = getResources().getDisplayMetrics().widthPixels;
+            Resources resources = getApplicationContext().getResources();
+            DisplayMetrics metrics = resources.getDisplayMetrics();
+            float dp = iDisplayWidth / (metrics.densityDpi / 160f);
+            if (dp < 360) {
+                dp = (dp - 17) / 2;
+                float px = Function.convertDpToPixel(dp, getApplicationContext());
+                imagesGridView.setColumnWidth(Math.round(px));
+            }
             for(int i=0;i<len-2;i++){
                 try {
                     exifInterface =new ExifInterface(paths[i]);
@@ -117,7 +129,7 @@ public class TagAlbumActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String xml) {
-           // pgsBar.setVisibility(View.GONE);
+           pgsBar.setVisibility(View.GONE);
             SingleAlbumAdapter_noCheck adapter = new SingleAlbumAdapter_noCheck(TagAlbumActivity.this, all_Tag_ImageList_toDisplay);
             imagesGridView.setAdapter(adapter);
 
