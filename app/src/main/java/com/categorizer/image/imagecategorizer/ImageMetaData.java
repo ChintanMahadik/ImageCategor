@@ -54,19 +54,13 @@ public class ImageMetaData extends AppCompatActivity
         System.out.println("Image Path is "+imagePath);
         try {
 
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "ChintanMahadik");
-                file.mkdirs();
             ExifInterface exifInterface = new ExifInterface(imagePath);
             exifInterface.setAttribute(ExifInterface.TAG_MAKE,tag_name);
             exifInterface.setAttribute("UserComment",desc);
-
             exifInterface.saveAttributes();
-
             String exif=" Tag Name is set to "+exifInterface.getAttribute(ExifInterface.TAG_MAKE);
             exif+="\nDescription is set to "+exifInterface.getAttribute("UserComment");
             exif+="\nfile source is set to "+exifInterface.getAttribute(ExifInterface.TAG_FILE_SOURCE);
-
-            // Toast.makeText(context, exif, Toast.LENGTH_LONG).show();
 
             System.out.println(exif);
             return exif;

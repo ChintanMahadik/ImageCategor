@@ -26,7 +26,8 @@ public class TaggedImagesInitializer
     static LinkedList<String> exifDataPath = new LinkedList<>();
     static LinkedList<ExifInterface> exifDataList=new LinkedList<>();
     static int doit=0;
-    public static void initialize_List(Context context) throws IOException {
+    static ExifInterface exifInterface= null;
+    public static void initialize_List(Context context){
 
             all_ImageList.clear();
             all_ImageList_toDisplay.clear();
@@ -40,24 +41,25 @@ public class TaggedImagesInitializer
                 Uri uriExternal = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
                 Uri uriInternal = MediaStore.Images.Media.INTERNAL_CONTENT_URI;
                 String[] projection = {MediaStore.MediaColumns.DATA,MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.MediaColumns.DATE_MODIFIED};
-                Cursor cursorExternal = context.getContentResolver().query(uriExternal, projection, "", null, null);
-                Cursor cursorInternal = context.getContentResolver().query(uriInternal, projection, "", null, null);
+                Cursor cursorExternal = context.getContentResolver().query(uriExternal, projection, "_data IS NOT NULL", null, null);
+                Cursor cursorInternal = context.getContentResolver().query(uriInternal, projection, "_data IS NOT NULL", null, null);
                 Cursor cursor = new MergeCursor(new Cursor[]{cursorExternal, cursorInternal});
                 while (cursor.moveToNext()) {
                     path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
                     album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
                     timestamp = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED));
-                    all_ImageList.add(Function.mappingInbox(album, path, timestamp, Function.converToTime(timestamp), countPhoto));
+                    if(path.contains("/emulated/0")) {
+                        all_ImageList.add(Function.mappingInbox(album, path, timestamp, Function.converToTime(timestamp), countPhoto));
 
-                    if(doit==1){
-                    ExifInterface exifInterface=new ExifInterface(path);
-                    String pathexif=exifInterface.getAttribute(ExifInterface.TAG_MAKE);
-                    exifDataMap.put(pathexif, path);
-                    exifDataPath.add(pathexif);
-
-                        exifDataList.add(new ExifInterface(path));
+                        if (doit == 1) {
+                            try {
+                                exifInterface = new ExifInterface(path);
+                            } catch (IOException e) {
+                                cursor.moveToNext();
+                            }
+                            exifDataList.add(exifInterface);
+                        }
                     }
-
                 }
                 System.out.println("Hi looping done");
                 if(doit==1){
@@ -74,7 +76,6 @@ public class TaggedImagesInitializer
                 all_ImageList_toDisplay.clear();
                 exifDataMap.clear();
                 exifDataPath.clear();
-
             initialize_List(context);
             ////////////////////Calling Database list of tags//////////////////////////////
             DatabaseHelper dbhelper=new DatabaseHelper(context,"IMAGE_TAGS");

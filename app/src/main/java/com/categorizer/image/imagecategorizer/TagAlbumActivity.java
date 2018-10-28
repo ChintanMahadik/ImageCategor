@@ -119,7 +119,7 @@ public class TagAlbumActivity extends AppCompatActivity {
 
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    i++;
                 }
 
 

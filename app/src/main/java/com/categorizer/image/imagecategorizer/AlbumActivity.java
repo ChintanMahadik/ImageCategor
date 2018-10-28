@@ -13,6 +13,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -34,6 +35,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -92,7 +94,6 @@ public class AlbumActivity extends AppCompatActivity {
         Intent intent = getIntent();
         album_name = intent.getStringExtra("name");
         setTitle(album_name);
-
         System.out.println("Last index "+lastTaggedIndex);
         galleryGridView = (GridView) findViewById(R.id.galleryGridView);
         int iDisplayWidth = getResources().getDisplayMetrics().widthPixels ;
@@ -165,6 +166,7 @@ public class AlbumActivity extends AppCompatActivity {
                     lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
                     layout.setLayoutParams(lp);
 
+
                     //////////////////////Drop down////////////////////////////////
                     sItems=setDropDown(lp);
 
@@ -235,7 +237,6 @@ public class AlbumActivity extends AppCompatActivity {
 
                                 try {
 
-
                                     if (imageList_Selected.get(i).endsWith(".png")) {
                                         //Toast.makeText(GalleryPreview.this,"This is PNG Image",Toast.LENGTH_SHORT).show();
                                         File dest = new File(imageList_Selected.get(i));
@@ -262,7 +263,10 @@ public class AlbumActivity extends AppCompatActivity {
 
 
                                     } else {
+                                        boolean flag=isExternalStorageWritable();
+                                        System.out.println("Assigned flag" + flag);
                                         setData = imd.setMetaData(imageList_Selected.get(i), getApplicationContext(), tag_item, description_text.getText().toString());
+
                                     }
 
 
@@ -565,10 +569,11 @@ public class AlbumActivity extends AppCompatActivity {
                 album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
                 timestamp = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED));
 
+                if(path.contains("/emulated/0"))
                 imageList.add(Function.mappingInbox(album, path, timestamp, Function.converToTime(timestamp), null));
             }
             cursor.close();
-            //Collections.sort(imageList, new MapComparator(Function.KEY_TIMESTAMP, "")); // Arranging photo album by timestamp decending
+            Collections.sort(imageList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging photo album by timestamp decending
             return xml;
         }
 
@@ -623,6 +628,14 @@ public class AlbumActivity extends AppCompatActivity {
             startActivity(getIntent());
     }
 
+    }
+
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -829,6 +842,8 @@ class SingleAlbumAdapter extends BaseAdapter {
         } catch (Exception e) {}
         return convertView;
     }
+
+
 }
 
 

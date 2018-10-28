@@ -47,15 +47,12 @@ public class Search extends AppCompatActivity {
         setContentView(R.layout.activity_search);
         getSupportActionBar().hide();
         intent = getIntent();
-        pgsBar = (ProgressBar) findViewById(R.id.pBar);
-
-
         search=(Button)findViewById(R.id.button);
         search_text = (EditText) findViewById(R.id.search);
-
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 search.setEnabled(false);
                 SearchImage si = new SearchImage();
                 si.execute();
@@ -68,20 +65,22 @@ public class Search extends AppCompatActivity {
     class SearchImage extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
-
+            pgsBar = (ProgressBar) findViewById(R.id.pBar);
+            pgsBar.setVisibility(View.VISIBLE);
             imagesGridView = (GridView) findViewById(R.id.searchedImages);
-            try {
-                TaggedImagesInitializer.doit=1;
-                pgsBar.setVisibility(View.VISIBLE);
-                TaggedImagesInitializer.initialize_List(Search.this);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
         }
         @Override
         protected String doInBackground(String... strings) {
 
             String xml = "";
+            try {
+                TaggedImagesInitializer.doit=1;
+                TaggedImagesInitializer.initialize_List(Search.this);
+            } catch (Exception e) {
+
+            }
+
             int iDisplayWidth = getResources().getDisplayMetrics().widthPixels;
             Resources resources = getApplicationContext().getResources();
             DisplayMetrics metrics = resources.getDisplayMetrics();
@@ -98,8 +97,6 @@ public class Search extends AppCompatActivity {
             else {
                 all_ImageList_toDisplay.clear();
                 for (int i = 0; i < exifDataList.size(); i++) {
-
-
                         ExifInterface exifInterface = exifDataList.get(i);
                         String tag = exifInterface.getAttribute(ExifInterface.TAG_MAKE);
                         String desc = exifInterface.getAttribute("UserComment");
